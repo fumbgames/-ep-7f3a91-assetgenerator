@@ -6,135 +6,150 @@
 <title>Evopal Asset Builder</title>
 <style>
   :root{
-    --bg: #10120f;
-    --panel: #171a15;
-    --panel-2: #1d2118;
-    --line: #2b3126;
-    --ink: #e8eadf;
-    --ink-dim: #9aa295;
-    --moss: #7fb069;
-    --moss-dim: #4f7a3d;
-    --amber: #e2b04a;
-    --rust: #c1502e;
-    --mono: 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
-    --sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
-  }
-  @font-face{
-    font-family:'IBM Plex Sans';
-    src: local('IBM Plex Sans');
+    --bg: #f5f5f7;
+    --panel: #ffffff;
+    --panel-2: #f5f5f7;
+    --line: #e5e5ea;
+    --ink: #1d1d1f;
+    --ink-dim: #86868b;
+    --moss: #30d158;
+    --moss-dim: #248a3d;
+    --blue: #0071e3;
+    --blue-dim: #0058b0;
+    --amber: #ff9f0a;
+    --rust: #ff3b30;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+    --mono: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+    --console: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);}
-  body{padding:28px 32px 80px;}
-  h1,h2,h3{font-family:var(--sans);font-weight:600;margin:0;}
-  a{color:var(--moss);}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  body{padding:36px 32px 90px;}
+  h1,h2,h3{font-family:var(--sans);font-weight:600;margin:0;letter-spacing:-0.01em;}
+  a{color:var(--blue);text-decoration:none;}
   .topline{
     display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;
-    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:24px;
+    padding-bottom:22px;margin-bottom:28px;max-width:1180px;margin-left:auto;margin-right:auto;
   }
-  .topline h1{font-size:22px;letter-spacing:0.2px;}
-  .topline .sub{color:var(--ink-dim);font-size:13px;font-family:var(--mono);}
-  .badge-count{font-family:var(--mono);font-size:12px;color:var(--moss);background:rgba(127,176,105,0.12);
-    border:1px solid rgba(127,176,105,0.35);padding:3px 9px;border-radius:3px;}
+  .topline h1{font-size:28px;letter-spacing:-0.02em;color:var(--ink);}
+  .topline .sub{color:var(--ink-dim);font-size:14px;font-family:var(--sans);font-weight:400;}
+  .badge-count{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--moss-dim);background:rgba(48,209,88,0.12);
+    padding:5px 12px;border-radius:980px;}
 
-  .grid{display:grid;grid-template-columns: 360px 1fr;gap:24px;align-items:start;}
+  .grid{display:grid;grid-template-columns: 380px 1fr;gap:20px;align-items:start;max-width:1180px;margin:0 auto;}
   @media (max-width: 980px){.grid{grid-template-columns:1fr;}}
 
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 18px 20px;margin-bottom:18px;}
-  .panel h2{font-size:13px;text-transform:none;color:var(--ink);margin-bottom:4px;}
-  .panel .hint{font-size:12px;color:var(--ink-dim);margin-bottom:14px;line-height:1.5;}
+  .stack{max-width:720px;margin:0 auto;}
 
-  label{display:block;font-size:12px;color:var(--ink-dim);margin:12px 0 5px;}
+  .panel{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-sm);border-radius:18px;padding:22px 22px 24px;margin-bottom:18px;}
+  .panel h2{font-size:16px;text-transform:none;color:var(--ink);margin-bottom:4px;letter-spacing:-0.01em;}
+  .panel .hint{font-size:13px;color:var(--ink-dim);margin-bottom:16px;line-height:1.5;}
+
+  label{display:block;font-size:13px;color:var(--ink-dim);margin:14px 0 6px;font-weight:500;}
   label:first-of-type{margin-top:0;}
   input[type=text],input[type=password],input[type=number],textarea,select{
     width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
-    padding:8px 10px;border-radius:4px;font-family:var(--mono);font-size:13px;
+    padding:10px 12px;border-radius:11px;font-family:var(--sans);font-size:14px;
+    -webkit-appearance:none;appearance:none;
   }
-  textarea{resize:vertical;font-family:var(--mono);line-height:1.5;}
-  input:focus,textarea:focus,select:focus{outline:1px solid var(--moss);border-color:var(--moss);}
+  select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%2386868b'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
+  textarea{resize:vertical;font-family:var(--console);line-height:1.5;font-size:12.5px;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,227,0.15);}
   .row{display:flex;gap:10px;}
   .row > *{flex:1;}
   .row-tight{display:flex;gap:8px;align-items:center;}
 
   button{
-    font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;
-    background:var(--moss-dim);color:#eef4e8;border:1px solid var(--moss);border-radius:4px;
-    padding:9px 16px;transition:background 0.12s ease;
+    font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;
+    background:var(--blue);color:#fff;border:none;border-radius:980px;
+    padding:10px 18px;transition:opacity 0.12s ease, transform 0.06s ease;
   }
-  button:hover{background:var(--moss);}
-  button:disabled{opacity:0.4;cursor:not-allowed;}
-  button.ghost{background:transparent;color:var(--ink-dim);border:1px solid var(--line);}
-  button.ghost:hover{background:var(--panel-2);color:var(--ink);}
-  button.small{padding:5px 10px;font-size:11.5px;font-weight:500;}
-  button.danger{background:transparent;border-color:var(--rust);color:var(--rust);}
-  button.danger:hover{background:rgba(193,80,46,0.12);}
+  button:hover{opacity:0.85;}
+  button:active{transform:scale(0.98);}
+  button:disabled{opacity:0.35;cursor:not-allowed;}
+  button.ghost{background:var(--panel-2);color:var(--ink);border:1px solid var(--line);}
+  button.ghost:hover{background:#ebebee;opacity:1;}
+  button.small{padding:6px 13px;font-size:12.5px;}
+  button.danger{background:rgba(255,59,48,0.1);border:none;color:var(--rust);}
+  button.danger:hover{background:rgba(255,59,48,0.18);opacity:1;}
+  #runAll{background:var(--moss-dim);}
 
-  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);}
+  .tabbar{display:flex;gap:4px;background:#e8e8ed;padding:4px;border-radius:12px;max-width:420px;margin:0 auto 28px;}
+  .tab-btn{flex:1;background:transparent;color:var(--ink-dim);border:none;border-radius:9px;padding:8px 14px;
+    font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;transition:background 0.15s ease, color 0.15s ease;}
+  .tab-btn:hover{opacity:1;color:var(--ink);}
+  .tab-btn.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.12);}
+  .tab-panel[hidden]{display:none;}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:1px solid var(--line);}
   .toggle-row:first-of-type{border-top:none;}
-  .toggle-row span.lbl{font-size:12.5px;color:var(--ink);}
-  .toggle-row span.desc{display:block;font-size:11px;color:var(--ink-dim);margin-top:1px;}
-  .switch{position:relative;width:34px;height:19px;flex-shrink:0;}
+  .toggle-row span.lbl{font-size:13.5px;color:var(--ink);font-weight:500;}
+  .toggle-row span.desc{display:block;font-size:12px;color:var(--ink-dim);margin-top:2px;line-height:1.4;}
+  .switch{position:relative;width:44px;height:26px;flex-shrink:0;}
   .switch input{opacity:0;width:0;height:0;}
-  .slider{position:absolute;inset:0;background:var(--line);border-radius:20px;cursor:pointer;transition:0.15s;}
-  .slider:before{content:"";position:absolute;width:14px;height:14px;left:2.5px;top:2.5px;background:var(--ink-dim);border-radius:50%;transition:0.15s;}
-  input:checked + .slider{background:var(--moss-dim);}
-  input:checked + .slider:before{background:#eef4e8;transform:translateX(15px);}
+  .slider{position:absolute;inset:0;background:#e5e5ea;border-radius:20px;cursor:pointer;transition:0.15s;}
+  .slider:before{content:"";position:absolute;width:22px;height:22px;left:2px;top:2px;background:#fff;border-radius:50%;transition:0.15s;box-shadow:0 1px 3px rgba(0,0,0,0.25);}
+  input:checked + .slider{background:var(--moss);}
+  input:checked + .slider:before{transform:translateX(18px);}
 
-  .elem-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
-  .elem-row{display:grid;grid-template-columns:20px 1fr 1fr 24px;gap:6px;align-items:center;}
-  .swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);}
-  .elem-row input[type=color]{width:20px;height:20px;padding:0;border:none;background:none;border-radius:3px;overflow:hidden;}
-  .icon-btn{background:none;border:none;color:var(--ink-dim);font-size:16px;padding:0;line-height:1;}
+  .elem-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+  .elem-row{display:grid;grid-template-columns:22px 1fr 1fr 24px;gap:8px;align-items:center;}
+  .swatch{width:14px;height:14px;border-radius:4px;border:1px solid rgba(0,0,0,0.1);}
+  .elem-row input[type=color]{width:22px;height:22px;padding:0;border:none;background:none;border-radius:6px;overflow:hidden;}
+  .icon-btn{background:none;border:none;color:var(--ink-dim);font-size:18px;padding:0;line-height:1;cursor:pointer;}
   .icon-btn:hover{color:var(--rust);}
 
-  .queue-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .queue-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
 
-  .results-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
-  .progress-wrap{flex:1;min-width:180px;height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden;border:1px solid var(--line);}
-  .progress-bar{height:100%;background:linear-gradient(90deg,var(--moss-dim),var(--moss));width:0%;transition:width 0.25s ease;}
-  .progress-txt{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);white-space:nowrap;}
+  .results-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .progress-wrap{flex:1;min-width:180px;height:6px;background:var(--panel-2);border-radius:10px;overflow:hidden;}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--moss-dim),var(--moss));width:0%;transition:width 0.25s ease;border-radius:10px;}
+  .progress-txt{font-family:var(--sans);font-size:13px;color:var(--ink-dim);white-space:nowrap;font-weight:500;}
 
   .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;}
-  .card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px;}
-  .card-head .name{font-size:13.5px;font-weight:600;}
-  .card-head .slug{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .elem-tag{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;}
-  .status{font-family:var(--mono);font-size:10.5px;padding:2px 6px;border-radius:3px;}
-  .status.ok{color:var(--moss);background:rgba(127,176,105,0.12);}
-  .status.pending{color:var(--amber);background:rgba(226,176,74,0.12);}
-  .status.error{color:var(--rust);background:rgba(193,80,46,0.12);}
-  .status.idle{color:var(--ink-dim);background:rgba(255,255,255,0.04);}
+  .card{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-sm);border-radius:16px;padding:14px;}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;}
+  .card-head .name{font-size:15px;font-weight:600;letter-spacing:-0.01em;}
+  .card-head .slug{font-family:var(--sans);font-size:12px;color:var(--ink-dim);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+  .elem-tag{font-family:var(--sans);font-size:11px;font-weight:600;padding:3px 9px;border-radius:980px;white-space:nowrap;text-transform:capitalize;}
+  .status{font-family:var(--sans);font-size:11px;font-weight:600;padding:3px 9px;border-radius:980px;text-transform:capitalize;}
+  .status.ok{color:var(--moss-dim);background:rgba(48,209,88,0.12);}
+  .status.pending{color:#b06a00;background:rgba(255,159,10,0.14);}
+  .status.error{color:var(--rust);background:rgba(255,59,48,0.1);}
+  .status.idle{color:var(--ink-dim);background:var(--panel-2);}
 
   .slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .slot{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;overflow:hidden;aspect-ratio:1;}
+  .slot{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;aspect-ratio:1;}
   .slot img{width:100%;height:100%;object-fit:contain;display:block;background:
-    linear-gradient(45deg,#20241b 25%,transparent 25%),linear-gradient(-45deg,#20241b 25%,transparent 25%),
-    linear-gradient(45deg,transparent 75%,#20241b 75%),linear-gradient(-45deg,transparent 75%,#20241b 75%);
+    linear-gradient(45deg,#eceef0 25%,transparent 25%),linear-gradient(-45deg,#eceef0 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#eceef0 75%),linear-gradient(-45deg,transparent 75%,#eceef0 75%);
     background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0px;}
-  .slot .label{position:absolute;top:0;left:0;right:0;font-family:var(--mono);font-size:9.5px;
-    color:var(--ink-dim);background:rgba(10,11,9,0.72);padding:2px 5px;text-transform:uppercase;letter-spacing:0.4px;}
-  .slot .empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:10px;font-family:var(--mono);}
-  .slot .overlay{position:absolute;bottom:0;left:0;right:0;display:flex;opacity:0;transition:opacity 0.12s;background:rgba(10,11,9,0.82);}
+  .slot .label{position:absolute;top:0;left:0;right:0;font-family:var(--sans);font-size:10px;font-weight:600;
+    color:#fff;background:rgba(0,0,0,0.38);padding:3px 6px;text-transform:uppercase;letter-spacing:0.3px;}
+  .slot .empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px;font-family:var(--sans);}
+  .slot .overlay{position:absolute;bottom:0;left:0;right:0;display:flex;opacity:0;transition:opacity 0.12s;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);}
   .slot:hover .overlay{opacity:1;}
-  .slot .overlay button{flex:1;border-radius:0;border:none;background:none;font-size:14px;padding:4px 0;color:var(--ink);}
-  .slot .overlay button:hover{background:rgba(127,176,105,0.25);}
+  .slot .overlay button{flex:1;border-radius:0;border:none;background:none;font-size:15px;padding:6px 0;color:#fff;}
+  .slot .overlay button:hover{background:rgba(255,255,255,0.18);opacity:1;}
 
-  .card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:6px;}
-  .card-note{font-size:10.5px;color:var(--rust);margin-top:6px;font-family:var(--mono);}
+  .card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:6px;}
+  .card-note{font-size:11.5px;color:var(--rust);margin-top:8px;font-family:var(--sans);line-height:1.4;}
 
-  .empty-state{border:1px dashed var(--line);border-radius:6px;padding:48px 20px;text-align:center;color:var(--ink-dim);font-size:13px;}
+  .empty-state{border:1.5px dashed var(--line);border-radius:16px;padding:52px 20px;text-align:center;color:var(--ink-dim);font-size:14px;background:rgba(0,0,0,0.012);}
 
-  .log{background:#0c0d0a;border:1px solid var(--line);border-radius:6px;padding:10px 12px;
-    font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);max-height:160px;overflow-y:auto;margin-top:16px;}
-  .log div{padding:1px 0;white-space:pre-wrap;word-break:break-word;}
-  .log .err{color:var(--rust);}
-  .log .ok{color:var(--moss);}
+  .log{background:#1d1d1f;border-radius:12px;padding:12px 14px;
+    font-family:var(--console);font-size:11.5px;color:#c7c7cc;max-height:160px;overflow-y:auto;margin-top:18px;}
+  .log div{padding:1.5px 0;white-space:pre-wrap;word-break:break-word;}
+  .log .err{color:#ff6961;}
+  .log .ok{color:#5fe58a;}
 
-  .footer-note{font-size:11px;color:var(--ink-dim);margin-top:6px;line-height:1.5;}
-  code{font-family:var(--mono);background:var(--panel-2);padding:1px 5px;border-radius:3px;font-size:11.5px;}
+  .footer-note{font-size:12px;color:var(--ink-dim);margin-top:6px;line-height:1.5;}
+  code{font-family:var(--console);background:var(--panel-2);padding:2px 6px;border-radius:5px;font-size:12px;color:var(--blue-dim);}
 </style>
 </head>
+
 <body>
 
 <div class="topline">
@@ -145,106 +160,14 @@
   <span class="badge-count" id="queueCount">0 queued</span>
 </div>
 
-<div class="grid">
-  <!-- LEFT COLUMN: config -->
-  <div>
-    <div class="panel">
-      <h2>Gemini connection</h2>
-      <div class="hint">Your key is kept only in this browser's local storage. Nothing is sent anywhere except Google's API.</div>
-      <label for="apiKey">API key</label>
-      <input type="password" id="apiKey" placeholder="AIza…">
-      <label for="model">Model</label>
-      <select id="model">
-        <option value="gemini-2.5-flash-image">gemini-2.5-flash-image (proven, cheapest — good default)</option>
-        <option value="gemini-3.1-flash-image">gemini-3.1-flash-image</option>
-        <option value="gemini-3-pro-image">gemini-3-pro-image (highest quality, slower/pricier)</option>
-      </select>
-      <div class="row" style="margin-top:12px;">
-        <button class="ghost small" id="testConn" type="button">Test key</button>
-        <span id="testResult" class="footer-note" style="align-self:center;"></span>
-      </div>
+<div class="tabbar" role="tablist">
+  <button class="tab-btn active" data-tab="generate" type="button">Generate</button>
+  <button class="tab-btn" data-tab="settings" type="button">Settings</button>
+  <button class="tab-btn" data-tab="history" type="button">History</button>
+</div>
 
-      <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px;flex-direction:column;align-items:stretch;gap:8px;">
-        <span class="lbl">Cost per image ($)</span>
-        <div class="row">
-          <div>
-            <label for="costFlash25" style="margin:0 0 3px;">2.5-flash-image</label>
-            <input type="number" id="costFlash25" value="0.039" min="0" step="0.001">
-          </div>
-          <div>
-            <label for="costFlash31" style="margin:0 0 3px;">3.1-flash-image</label>
-            <input type="number" id="costFlash31" value="0.067" min="0" step="0.001">
-          </div>
-          <div>
-            <label for="costPro3" style="margin:0 0 3px;">3-pro-image</label>
-            <input type="number" id="costPro3" value="0.134" min="0" step="0.001">
-          </div>
-        </div>
-        <div class="footer-note">Rough per-image estimates at standard resolution, editable if your invoiced rate differs — Google bills by output tokens, so treat this as an estimate, not an exact figure.</div>
-      </div>
-
-      <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:2px;padding-top:12px;align-items:center;">
-        <div>
-          <span class="lbl" style="font-size:13px;">Total spent</span>
-          <span class="desc" id="totalSpentDesc">$0.00 · 0 images</span>
-        </div>
-        <button class="ghost small" id="resetSpend" type="button">Reset</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Batch behaviour</h2>
-      <div class="row">
-        <div>
-          <label for="concurrency">Parallel requests</label>
-          <input type="number" id="concurrency" value="2" min="1" max="6">
-        </div>
-        <div>
-          <label for="delayMs">Delay between (ms)</label>
-          <input type="number" id="delayMs" value="400" min="0" step="100">
-        </div>
-      </div>
-      <div class="footer-note">Image models rate-limit hard. Start low (2 parallel) — bump it up once you know your quota holds for a run of hundreds.</div>
-    </div>
-
-    <div class="panel">
-      <h2>Element palettes</h2>
-      <div class="hint">Pick an element per animal below — this is what each one maps to in the fixed prompt template.</div>
-      <div class="elem-list" id="elemList"></div>
-      <button class="ghost small" id="addElem" type="button">+ Add element</button>
-    </div>
-
-    <div class="panel">
-      <h2>Post-processing</h2>
-      <div class="toggle-row">
-        <div><span class="lbl">Strip background</span><span class="desc">Flood-fills from the corners and makes the flat background transparent</span></div>
-        <label class="switch"><input type="checkbox" id="stripBg" checked><span class="slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <div><span class="lbl">Crop &amp; center</span><span class="desc">Crops to the character's bounding box, then centers on a square canvas</span></div>
-        <label class="switch"><input type="checkbox" id="cropCenter" checked><span class="slider"></span></label>
-      </div>
-      <div class="row" style="margin-top:10px;">
-        <div>
-          <label for="canvasSize">Canvas size (px)</label>
-          <input type="number" id="canvasSize" value="512" min="64" step="32">
-        </div>
-        <div>
-          <label for="bgTolerance">Background tolerance</label>
-          <input type="number" id="bgTolerance" value="28" min="0" max="120">
-        </div>
-      </div>
-      <div class="toggle-row" style="margin-top:2px;">
-        <div><span class="lbl">Quantize palette</span><span class="desc">Median-cut reduce to a fixed colour count, matching your existing asset pipeline</span></div>
-        <label class="switch"><input type="checkbox" id="quantize" checked><span class="slider"></span></label>
-      </div>
-      <label for="quantColors">Colour count</label>
-      <input type="number" id="quantColors" value="32" min="4" max="256">
-    </div>
-  </div>
-
-  <!-- RIGHT COLUMN: queue + results -->
-  <div>
+<div class="tab-panel" id="tab-generate">
+  <div class="stack">
     <div class="panel">
       <h2>Add an animal</h2>
       <div class="hint">Pick an element, describe the animal, describe what makes this one distinct. Everything else in the prompt stays fixed.</div>
@@ -284,13 +207,136 @@ water | jellyfish | translucent, drifts sideways</textarea>
         <button class="danger" id="removeDone" type="button">Clear finished</button>
       </div>
       <div id="cardsWrap">
-        <div class="empty-state" id="emptyState">Nothing queued yet. Add species on the left, then hit Generate.</div>
+        <div class="empty-state" id="emptyState">Nothing queued yet. Add species above, then hit Generate.</div>
         <div class="cards" id="cards"></div>
       </div>
       <div class="log" id="log"></div>
     </div>
   </div>
 </div>
+
+<div class="tab-panel" id="tab-settings" hidden>
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>Gemini connection</h2>
+        <div class="hint">Your key is kept only in this browser's local storage. Nothing is sent anywhere except Google's API.</div>
+        <label for="apiKey">API key</label>
+        <input type="password" id="apiKey" placeholder="AIza…">
+        <label for="model">Model</label>
+        <select id="model">
+          <option value="gemini-2.5-flash-image">gemini-2.5-flash-image (proven, cheapest — good default)</option>
+          <option value="gemini-3.1-flash-image">gemini-3.1-flash-image</option>
+          <option value="gemini-3-pro-image">gemini-3-pro-image (highest quality, slower/pricier)</option>
+        </select>
+        <div class="row" style="margin-top:12px;">
+          <button class="ghost small" id="testConn" type="button">Test key</button>
+          <span id="testResult" class="footer-note" style="align-self:center;"></span>
+        </div>
+
+        <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px;flex-direction:column;align-items:stretch;gap:8px;">
+          <span class="lbl">Cost per image ($)</span>
+          <div class="row">
+            <div>
+              <label for="costFlash25" style="margin:0 0 3px;">2.5-flash-image</label>
+              <input type="number" id="costFlash25" value="0.039" min="0" step="0.001">
+            </div>
+            <div>
+              <label for="costFlash31" style="margin:0 0 3px;">3.1-flash-image</label>
+              <input type="number" id="costFlash31" value="0.067" min="0" step="0.001">
+            </div>
+            <div>
+              <label for="costPro3" style="margin:0 0 3px;">3-pro-image</label>
+              <input type="number" id="costPro3" value="0.134" min="0" step="0.001">
+            </div>
+          </div>
+          <div class="footer-note">Rough per-image estimates at standard resolution, editable if your invoiced rate differs — Google bills by output tokens, so treat this as an estimate, not an exact figure.</div>
+        </div>
+
+        <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:2px;padding-top:12px;align-items:center;">
+          <div>
+            <span class="lbl" style="font-size:13px;">Total spent</span>
+            <span class="desc" id="totalSpentDesc">$0.00 · 0 images</span>
+          </div>
+          <button class="ghost small" id="resetSpend" type="button">Reset</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Batch behaviour</h2>
+        <div class="row">
+          <div>
+            <label for="concurrency">Parallel requests</label>
+            <input type="number" id="concurrency" value="2" min="1" max="6">
+          </div>
+          <div>
+            <label for="delayMs">Delay between (ms)</label>
+            <input type="number" id="delayMs" value="400" min="0" step="100">
+          </div>
+        </div>
+        <div class="footer-note">Image models rate-limit hard. Start low (2 parallel) — bump it up once you know your quota holds for a run of hundreds.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Element palettes</h2>
+        <div class="hint">Pick an element per animal below — this is what each one maps to in the fixed prompt template.</div>
+        <div class="elem-list" id="elemList"></div>
+        <button class="ghost small" id="addElem" type="button">+ Add element</button>
+      </div>
+
+      <div class="panel">
+        <h2>Post-processing</h2>
+        <div class="toggle-row">
+          <div><span class="lbl">Strip background</span><span class="desc">Flood-fills from the corners and makes the flat background transparent</span></div>
+          <label class="switch"><input type="checkbox" id="stripBg" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><span class="lbl">Crop &amp; center</span><span class="desc">Crops to the character's bounding box, then centers on a square canvas</span></div>
+          <label class="switch"><input type="checkbox" id="cropCenter" checked><span class="slider"></span></label>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <div>
+            <label for="canvasSize">Canvas size (px)</label>
+            <input type="number" id="canvasSize" value="512" min="64" step="32">
+          </div>
+          <div>
+            <label for="bgTolerance">Background tolerance</label>
+            <input type="number" id="bgTolerance" value="28" min="0" max="120">
+          </div>
+        </div>
+        <div class="toggle-row" style="margin-top:2px;">
+          <div><span class="lbl">Quantize palette</span><span class="desc">Median-cut reduce to a fixed colour count, matching your existing asset pipeline</span></div>
+          <label class="switch"><input type="checkbox" id="quantize" checked><span class="slider"></span></label>
+        </div>
+        <label for="quantColors">Colour count</label>
+        <input type="number" id="quantColors" value="32" min="4" max="256">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-history" hidden>
+  <div class="stack">
+    <div class="panel">
+      <div class="results-head">
+        <h2 style="flex-shrink:0;">History</h2>
+        <span class="footer-note" id="historyCount" style="margin-left:auto;">0 saved</span>
+      </div>
+      <div class="hint">Every animal that finishes all 4 assets is saved here automatically — kept in this browser even after you close the tab or clear the queue.</div>
+      <div class="queue-actions" style="margin-top:0;margin-bottom:16px;">
+        <button class="ghost" id="downloadHistoryZip" type="button">Download all history as .zip</button>
+        <button class="danger" id="clearHistory" type="button">Clear history</button>
+      </div>
+      <div id="historyWrap">
+        <div class="empty-state" id="historyEmpty">Nothing saved yet — finished generations will show up here.</div>
+        <div class="cards" id="historyCards"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
 (function(){
@@ -322,6 +368,89 @@ Generate 4 images.
 3. The same as 2 but from behind
 4. The character asleep`;
   const DEFAULT_BACKGROUND = "green";
+
+  // ---------- persistent history (IndexedDB — holds actual image blobs, unlike localStorage) ----------
+  const DB_NAME = "evopalAssetBuilderDB";
+  const DB_STORE = "history";
+  let dbPromise = null;
+
+  function openDB(){
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(DB_STORE)){
+          db.createObjectStore(DB_STORE, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbPromise;
+  }
+
+  async function historyPut(record){
+    try {
+      const db = await openDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        tx.objectStore(DB_STORE).put(record);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch(e){ log(`Couldn't save to history: ${e.message || e}`, "err"); }
+  }
+
+  async function historyGetAll(){
+    try {
+      const db = await openDB();
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readonly");
+        const req = tx.objectStore(DB_STORE).getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+    } catch(e){ log(`Couldn't load history: ${e.message || e}`, "err"); return []; }
+  }
+
+  async function historyDelete(id){
+    try {
+      const db = await openDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        tx.objectStore(DB_STORE).delete(id);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch(e){ log(`Couldn't delete from history: ${e.message || e}`, "err"); }
+  }
+
+  async function historyClear(){
+    try {
+      const db = await openDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, "readwrite");
+        tx.objectStore(DB_STORE).clear();
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch(e){ log(`Couldn't clear history: ${e.message || e}`, "err"); }
+  }
+
+  async function saveSpeciesToHistory(species){
+    if (!species.slots.every(s => s.status === "ok" && s.blob)) return; // only save complete sets
+    await historyPut({
+      id: species.id,
+      animal: species.animal,
+      characteristic: species.characteristic,
+      element: species.element,
+      cost: species.cost || 0,
+      savedAt: Date.now(),
+      slots: species.slots.map((s, i) => ({ label: SLOT_DEFS[i].label, blob: s.blob }))
+    });
+    await renderHistory();
+  }
 
   // ---------- persisted settings ----------
   const LS_KEY = "evopalAssetBuilder.v1";
@@ -783,6 +912,7 @@ Generate 4 images.
       } else {
         species.status = "ok";
         log(`${species.animal}: generated all 4 assets.`, "ok");
+        saveSpeciesToHistory(species);
       }
     } catch(err){
       species.status = "error";
@@ -805,6 +935,7 @@ Generate 4 images.
       species.slots[slotIndex] = { status: "ok", url: URL.createObjectURL(finalBlob), blob: finalBlob };
       if (species.slots.every(s => s.status === "ok")){
         species.status = "ok"; species.error = null;
+        saveSpeciesToHistory(species);
       }
       log(`${species.animal}: regenerated ${SLOT_DEFS[slotIndex].label}.`, "ok");
     } catch(err){
@@ -1018,6 +1149,89 @@ Generate 4 images.
     log(`Downloaded evopal-assets zip (${files.length} images).`, "ok");
   });
 
+  // ---------- history rendering ----------
+  let historyRecords = [];
+
+  async function renderHistory(){
+    historyRecords = await historyGetAll();
+    historyRecords.sort((a, b) => b.savedAt - a.savedAt);
+    $("historyCount").textContent = `${historyRecords.length} saved`;
+    const wrap = $("historyCards");
+    const empty = $("historyEmpty");
+    if (historyRecords.length === 0){
+      wrap.style.display = "none"; empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none"; wrap.style.display = "grid";
+    wrap.innerHTML = "";
+    historyRecords.forEach(rec => {
+      const el = elementFor(rec.element);
+      const date = new Date(rec.savedAt);
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="name">${escapeHtml(rec.animal)}</div>
+            <div class="slug">${rec.characteristic ? escapeHtml(rec.characteristic) : date.toLocaleDateString()}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+            <span class="elem-tag" style="background:${el.color}33;color:${el.color};border:1px solid ${el.color}66;">${escapeHtml(rec.element)}</span>
+            <span class="footer-note" style="margin:0;">$${(rec.cost || 0).toFixed(3)}</span>
+          </div>
+        </div>
+        <div class="slots">
+          ${rec.slots.map(s => `
+            <div class="slot">
+              <span class="label">${s.label}</span>
+              <img src="${URL.createObjectURL(s.blob)}" alt="${s.label}">
+            </div>
+          `).join("")}
+        </div>
+        <div class="card-note" style="color:var(--ink-dim);">${date.toLocaleString()}</div>
+        <div class="card-foot">
+          <button class="ghost small dl-one">Download .zip</button>
+          <button class="danger small del-one">Delete</button>
+        </div>
+      `;
+      card.querySelector(".dl-one").addEventListener("click", async () => {
+        const files = rec.slots.map(s => ({ name: `${slugify(rec.animal)}_${s.label}.png`, blob: s.blob }));
+        const zip = await buildZip(files);
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(zip);
+        a.download = `${slugify(rec.animal)}.zip`;
+        a.click();
+      });
+      card.querySelector(".del-one").addEventListener("click", async () => {
+        await historyDelete(rec.id);
+        renderHistory();
+      });
+      wrap.appendChild(card);
+    });
+  }
+
+  $("downloadHistoryZip").addEventListener("click", async () => {
+    if (historyRecords.length === 0){ log("History is empty.", "err"); return; }
+    const files = [];
+    historyRecords.forEach(rec => {
+      rec.slots.forEach(s => files.push({ name: `${slugify(rec.animal)}_${s.label}.png`, blob: s.blob }));
+    });
+    log(`Zipping ${files.length} images from history…`);
+    const zip = await buildZip(files);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(zip);
+    a.download = `evopal-history-${new Date().toISOString().slice(0,10)}.zip`;
+    a.click();
+    log(`Downloaded full history zip (${files.length} images).`, "ok");
+  });
+
+  $("clearHistory").addEventListener("click", async () => {
+    if (!confirm(`Delete all ${historyRecords.length} saved generations? This can't be undone — download the zip first if you want to keep them.`)) return;
+    await historyClear();
+    renderHistory();
+    log("History cleared.", "ok");
+  });
+
   // ---------- persist settings on change ----------
   ["apiKey","model","concurrency","delayMs","stripBg","cropCenter","canvasSize","bgTolerance","quantize","quantColors","costFlash25","costFlash31","costPro3"]
     .forEach(id => $(id).addEventListener("change", saveSettings));
@@ -1028,6 +1242,19 @@ Generate 4 images.
     state.totalImages = 0;
     renderSpend();
     saveSettings();
+  });
+
+  // ---------- tabs ----------
+  function showTab(name){
+    ["generate","settings","history"].forEach(t => {
+      $("tab-" + t).hidden = (t !== name);
+    });
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === name);
+    });
+  }
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => showTab(btn.dataset.tab));
   });
 
   // ---------- init ----------
@@ -1052,6 +1279,7 @@ Generate 4 images.
     renderSpend();
     renderElements();
     renderCards();
+    renderHistory();
     log("Ready. Paste species into the queue and add your API key to begin.");
   })();
 
