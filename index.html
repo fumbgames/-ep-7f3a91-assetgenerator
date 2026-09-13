@@ -163,6 +163,33 @@
         <button class="ghost small" id="testConn" type="button">Test key</button>
         <span id="testResult" class="footer-note" style="align-self:center;"></span>
       </div>
+
+      <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px;flex-direction:column;align-items:stretch;gap:8px;">
+        <span class="lbl">Cost per image ($)</span>
+        <div class="row">
+          <div>
+            <label for="costFlash25" style="margin:0 0 3px;">2.5-flash-image</label>
+            <input type="number" id="costFlash25" value="0.039" min="0" step="0.001">
+          </div>
+          <div>
+            <label for="costFlash31" style="margin:0 0 3px;">3.1-flash-image</label>
+            <input type="number" id="costFlash31" value="0.067" min="0" step="0.001">
+          </div>
+          <div>
+            <label for="costPro3" style="margin:0 0 3px;">3-pro-image</label>
+            <input type="number" id="costPro3" value="0.134" min="0" step="0.001">
+          </div>
+        </div>
+        <div class="footer-note">Rough per-image estimates at standard resolution, editable if your invoiced rate differs — Google bills by output tokens, so treat this as an estimate, not an exact figure.</div>
+      </div>
+
+      <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:2px;padding-top:12px;align-items:center;">
+        <div>
+          <span class="lbl" style="font-size:13px;">Total spent</span>
+          <span class="desc" id="totalSpentDesc">$0.00 · 0 images</span>
+        </div>
+        <button class="ghost small" id="resetSpend" type="button">Reset</button>
+      </div>
     </div>
 
     <div class="panel">
@@ -313,7 +340,12 @@ Generate 4 images.
       canvasSize: $("canvasSize").value,
       bgTolerance: $("bgTolerance").value,
       quantize: $("quantize").checked,
-      quantColors: $("quantColors").value
+      quantColors: $("quantColors").value,
+      costFlash25: $("costFlash25").value,
+      costFlash31: $("costFlash31").value,
+      costPro3: $("costPro3").value,
+      totalSpent: state.totalSpent,
+      totalImages: state.totalImages
     };
     try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e){ /* quota / private mode — ignore */ }
   }
@@ -323,8 +355,30 @@ Generate 4 images.
   const state = {
     elements: DEFAULT_ELEMENTS.slice(),
     queue: [],     // {id, animal, characteristic, description, element, status, error, slots:[{status,url,blob}]}
-    running: false
+    running: false,
+    totalSpent: 0,
+    totalImages: 0
   };
+
+  function costPerImage(model){
+    if (model === "gemini-3.1-flash-image") return parseFloat($("costFlash31").value) || 0;
+    if (model === "gemini-3-pro-image") return parseFloat($("costPro3").value) || 0;
+    return parseFloat($("costFlash25").value) || 0; // gemini-2.5-flash-image, and fallback
+  }
+
+  function recordSpend(imageCount, species){
+    if (imageCount <= 0) return;
+    const cost = imageCount * costPerImage($("model").value);
+    state.totalSpent += cost;
+    state.totalImages += imageCount;
+    if (species) species.cost = (species.cost || 0) + cost;
+    renderSpend();
+    saveSettings();
+  }
+
+  function renderSpend(){
+    $("totalSpentDesc").textContent = `$${state.totalSpent.toFixed(2)} · ${state.totalImages} image${state.totalImages === 1 ? "" : "s"}`;
+  }
 
   function renderElementDropdown(){
     const sel = $("quickElement");
@@ -463,6 +517,7 @@ Generate 4 images.
       slug: slugify(animal),
       status: "idle", // idle | pending | ok | error
       error: null,
+      cost: 0,
       slots: SLOT_DEFS.map(() => ({ status: "idle", url: null, blob: null }))
     });
   }
@@ -711,6 +766,7 @@ Generate 4 images.
       if (images.length === 0){
         throw new Error("No images in response (likely a safety block or an over-long prompt)");
       }
+      recordSpend(images.length, species);
       for (let i=0;i<4;i++){
         if (images[i]){
           const rawBlob = await blobFromInline(images[i]);
@@ -743,6 +799,7 @@ Generate 4 images.
       const prompt = buildSlotPrompt(species, SLOT_DEFS[slotIndex]);
       const images = await callGemini(prompt);
       if (images.length === 0) throw new Error("No image returned");
+      recordSpend(images.length, species);
       const rawBlob = await blobFromInline(images[0]);
       const finalBlob = await processImage(rawBlob);
       species.slots[slotIndex] = { status: "ok", url: URL.createObjectURL(finalBlob), blob: finalBlob };
@@ -816,6 +873,7 @@ Generate 4 images.
           <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
             <span class="elem-tag" style="background:${el.color}33;color:${el.color};border:1px solid ${el.color}66;">${escapeHtml(el.name)}</span>
             <span class="status ${statusCls}">${species.status}</span>
+            ${species.cost ? `<span class="footer-note" style="margin:0;">$${species.cost.toFixed(3)}</span>` : ""}
           </div>
         </div>
         <div class="slots">
@@ -961,8 +1019,16 @@ Generate 4 images.
   });
 
   // ---------- persist settings on change ----------
-  ["apiKey","model","concurrency","delayMs","stripBg","cropCenter","canvasSize","bgTolerance","quantize","quantColors"]
+  ["apiKey","model","concurrency","delayMs","stripBg","cropCenter","canvasSize","bgTolerance","quantize","quantColors","costFlash25","costFlash31","costPro3"]
     .forEach(id => $(id).addEventListener("change", saveSettings));
+
+  $("resetSpend").addEventListener("click", () => {
+    if (!confirm("Reset the running total back to $0.00? This doesn't undo any charges, just the counter.")) return;
+    state.totalSpent = 0;
+    state.totalImages = 0;
+    renderSpend();
+    saveSettings();
+  });
 
   // ---------- init ----------
   (function init(){
@@ -978,6 +1044,12 @@ Generate 4 images.
     if (saved.bgTolerance != null) $("bgTolerance").value = saved.bgTolerance;
     if (saved.quantize != null) $("quantize").checked = saved.quantize;
     if (saved.quantColors) $("quantColors").value = saved.quantColors;
+    if (saved.costFlash25 != null) $("costFlash25").value = saved.costFlash25;
+    if (saved.costFlash31 != null) $("costFlash31").value = saved.costFlash31;
+    if (saved.costPro3 != null) $("costPro3").value = saved.costPro3;
+    state.totalSpent = saved.totalSpent || 0;
+    state.totalImages = saved.totalImages || 0;
+    renderSpend();
     renderElements();
     renderCards();
     log("Ready. Paste species into the queue and add your API key to begin.");
