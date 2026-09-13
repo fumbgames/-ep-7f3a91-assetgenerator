@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evopal Asset Builder</title>
+<style>
+  :root{
+    --bg: #10120f;
+    --panel: #171a15;
+    --panel-2: #1d2118;
+    --line: #2b3126;
+    --ink: #e8eadf;
+    --ink-dim: #9aa295;
+    --moss: #7fb069;
+    --moss-dim: #4f7a3d;
+    --amber: #e2b04a;
+    --rust: #c1502e;
+    --mono: 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
+    --sans: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+  @font-face{
+    font-family:'IBM Plex Sans';
+    src: local('IBM Plex Sans');
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--sans);}
+  body{padding:28px 32px 80px;}
+  h1,h2,h3{font-family:var(--sans);font-weight:600;margin:0;}
+  a{color:var(--moss);}
+  .topline{
+    display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:24px;
+  }
+  .topline h1{font-size:22px;letter-spacing:0.2px;}
+  .topline .sub{color:var(--ink-dim);font-size:13px;font-family:var(--mono);}
+  .badge-count{font-family:var(--mono);font-size:12px;color:var(--moss);background:rgba(127,176,105,0.12);
+    border:1px solid rgba(127,176,105,0.35);padding:3px 9px;border-radius:3px;}
+
+  .grid{display:grid;grid-template-columns: 360px 1fr;gap:24px;align-items:start;}
+  @media (max-width: 980px){.grid{grid-template-columns:1fr;}}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 18px 20px;margin-bottom:18px;}
+  .panel h2{font-size:13px;text-transform:none;color:var(--ink);margin-bottom:4px;}
+  .panel .hint{font-size:12px;color:var(--ink-dim);margin-bottom:14px;line-height:1.5;}
+
+  label{display:block;font-size:12px;color:var(--ink-dim);margin:12px 0 5px;}
+  label:first-of-type{margin-top:0;}
+  input[type=text],input[type=password],input[type=number],textarea,select{
+    width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);
+    padding:8px 10px;border-radius:4px;font-family:var(--mono);font-size:13px;
+  }
+  textarea{resize:vertical;font-family:var(--mono);line-height:1.5;}
+  input:focus,textarea:focus,select:focus{outline:1px solid var(--moss);border-color:var(--moss);}
+  .row{display:flex;gap:10px;}
+  .row > *{flex:1;}
+  .row-tight{display:flex;gap:8px;align-items:center;}
+
+  button{
+    font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;
+    background:var(--moss-dim);color:#eef4e8;border:1px solid var(--moss);border-radius:4px;
+    padding:9px 16px;transition:background 0.12s ease;
+  }
+  button:hover{background:var(--moss);}
+  button:disabled{opacity:0.4;cursor:not-allowed;}
+  button.ghost{background:transparent;color:var(--ink-dim);border:1px solid var(--line);}
+  button.ghost:hover{background:var(--panel-2);color:var(--ink);}
+  button.small{padding:5px 10px;font-size:11.5px;font-weight:500;}
+  button.danger{background:transparent;border-color:var(--rust);color:var(--rust);}
+  button.danger:hover{background:rgba(193,80,46,0.12);}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);}
+  .toggle-row:first-of-type{border-top:none;}
+  .toggle-row span.lbl{font-size:12.5px;color:var(--ink);}
+  .toggle-row span.desc{display:block;font-size:11px;color:var(--ink-dim);margin-top:1px;}
+  .switch{position:relative;width:34px;height:19px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:var(--line);border-radius:20px;cursor:pointer;transition:0.15s;}
+  .slider:before{content:"";position:absolute;width:14px;height:14px;left:2.5px;top:2.5px;background:var(--ink-dim);border-radius:50%;transition:0.15s;}
+  input:checked + .slider{background:var(--moss-dim);}
+  input:checked + .slider:before{background:#eef4e8;transform:translateX(15px);}
+
+  .elem-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .elem-row{display:grid;grid-template-columns:20px 1fr 1fr 24px;gap:6px;align-items:center;}
+  .swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);}
+  .elem-row input[type=color]{width:20px;height:20px;padding:0;border:none;background:none;border-radius:3px;overflow:hidden;}
+  .icon-btn{background:none;border:none;color:var(--ink-dim);font-size:16px;padding:0;line-height:1;}
+  .icon-btn:hover{color:var(--rust);}
+
+  .queue-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+  .results-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .progress-wrap{flex:1;min-width:180px;height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden;border:1px solid var(--line);}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--moss-dim),var(--moss));width:0%;transition:width 0.25s ease;}
+  .progress-txt{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);white-space:nowrap;}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;}
+  .card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px;}
+  .card-head .name{font-size:13.5px;font-weight:600;}
+  .card-head .slug{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .elem-tag{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;}
+  .status{font-family:var(--mono);font-size:10.5px;padding:2px 6px;border-radius:3px;}
+  .status.ok{color:var(--moss);background:rgba(127,176,105,0.12);}
+  .status.pending{color:var(--amber);background:rgba(226,176,74,0.12);}
+  .status.error{color:var(--rust);background:rgba(193,80,46,0.12);}
+  .status.idle{color:var(--ink-dim);background:rgba(255,255,255,0.04);}
+
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .slot{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;overflow:hidden;aspect-ratio:1;}
+  .slot img{width:100%;height:100%;object-fit:contain;display:block;background:
+    linear-gradient(45deg,#20241b 25%,transparent 25%),linear-gradient(-45deg,#20241b 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#20241b 75%),linear-gradient(-45deg,transparent 75%,#20241b 75%);
+    background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0px;}
+  .slot .label{position:absolute;top:0;left:0;right:0;font-family:var(--mono);font-size:9.5px;
+    color:var(--ink-dim);background:rgba(10,11,9,0.72);padding:2px 5px;text-transform:uppercase;letter-spacing:0.4px;}
+  .slot .empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:10px;font-family:var(--mono);}
+  .slot .overlay{position:absolute;bottom:0;left:0;right:0;display:flex;opacity:0;transition:opacity 0.12s;background:rgba(10,11,9,0.82);}
+  .slot:hover .overlay{opacity:1;}
+  .slot .overlay button{flex:1;border-radius:0;border:none;background:none;font-size:14px;padding:4px 0;color:var(--ink);}
+  .slot .overlay button:hover{background:rgba(127,176,105,0.25);}
+
+  .card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:6px;}
+  .card-note{font-size:10.5px;color:var(--rust);margin-top:6px;font-family:var(--mono);}
+
+  .empty-state{border:1px dashed var(--line);border-radius:6px;padding:48px 20px;text-align:center;color:var(--ink-dim);font-size:13px;}
+
+  .log{background:#0c0d0a;border:1px solid var(--line);border-radius:6px;padding:10px 12px;
+    font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);max-height:160px;overflow-y:auto;margin-top:16px;}
+  .log div{padding:1px 0;white-space:pre-wrap;word-break:break-word;}
+  .log .err{color:var(--rust);}
+  .log .ok{color:var(--moss);}
+
+  .footer-note{font-size:11px;color:var(--ink-dim);margin-top:6px;line-height:1.5;}
+  code{font-family:var(--mono);background:var(--panel-2);padding:1px 5px;border-radius:3px;font-size:11.5px;}
+</style>
+</head>
+<body>
+
+<div class="topline">
+  <div>
+    <h1>Evopal Asset Builder</h1>
+    <div class="sub">card · battlefront · battleback · asleep — generated four at a time via Gemini</div>
+  </div>
+  <span class="badge-count" id="queueCount">0 queued</span>
+</div>
+
+<div class="grid">
+  <!-- LEFT COLUMN: config -->
+  <div>
+    <div class="panel">
+      <h2>Gemini connection</h2>
+      <div class="hint">Your key is kept only in this browser's local storage. Nothing is sent anywhere except Google's API.</div>
+      <label for="apiKey">API key</label>
+      <input type="password" id="apiKey" placeholder="AIza…">
+      <label for="model">Model</label>
+      <select id="model">
+        <option value="gemini-2.5-flash-image">gemini-2.5-flash-image (proven, cheapest — good default)</option>
+        <option value="gemini-3.1-flash-image">gemini-3.1-flash-image</option>
+        <option value="gemini-3-pro-image">gemini-3-pro-image (highest quality, slower/pricier)</option>
+      </select>
+      <div class="row" style="margin-top:12px;">
+        <button class="ghost small" id="testConn" type="button">Test key</button>
+        <span id="testResult" class="footer-note" style="align-self:center;"></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Batch behaviour</h2>
+      <div class="row">
+        <div>
+          <label for="concurrency">Parallel requests</label>
+          <input type="number" id="concurrency" value="2" min="1" max="6">
+        </div>
+        <div>
+          <label for="delayMs">Delay between (ms)</label>
+          <input type="number" id="delayMs" value="400" min="0" step="100">
+        </div>
+      </div>
+      <div class="footer-note">Image models rate-limit hard. Start low (2 parallel) — bump it up once you know your quota holds for a run of hundreds.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Element palettes</h2>
+      <div class="hint">Pick an element per animal below — this is what each one maps to in the fixed prompt template.</div>
+      <div class="elem-list" id="elemList"></div>
+      <button class="ghost small" id="addElem" type="button">+ Add element</button>
+    </div>
+
+    <div class="panel">
+      <h2>Post-processing</h2>
+      <div class="toggle-row">
+        <div><span class="lbl">Strip background</span><span class="desc">Flood-fills from the corners and makes the flat background transparent</span></div>
+        <label class="switch"><input type="checkbox" id="stripBg" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><span class="lbl">Crop &amp; center</span><span class="desc">Crops to the character's bounding box, then centers on a square canvas</span></div>
+        <label class="switch"><input type="checkbox" id="cropCenter" checked><span class="slider"></span></label>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label for="canvasSize">Canvas size (px)</label>
+          <input type="number" id="canvasSize" value="512" min="64" step="32">
+        </div>
+        <div>
+          <label for="bgTolerance">Background tolerance</label>
+          <input type="number" id="bgTolerance" value="28" min="0" max="120">
+        </div>
+      </div>
+      <div class="toggle-row" style="margin-top:2px;">
+        <div><span class="lbl">Quantize palette</span><span class="desc">Median-cut reduce to a fixed colour count, matching your existing asset pipeline</span></div>
+        <label class="switch"><input type="checkbox" id="quantize" checked><span class="slider"></span></label>
+      </div>
+      <label for="quantColors">Colour count</label>
+      <input type="number" id="quantColors" value="32" min="4" max="256">
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: queue + results -->
+  <div>
+    <div class="panel">
+      <h2>Add an animal</h2>
+      <div class="hint">Pick an element, describe the animal, describe what makes this one distinct. Everything else in the prompt stays fixed.</div>
+      <label for="quickElement">Element</label>
+      <select id="quickElement"></select>
+      <label for="quickAnimal">Animal</label>
+      <input type="text" id="quickAnimal" placeholder="crow">
+      <label for="quickCharacteristic">Characteristic</label>
+      <input type="text" id="quickCharacteristic" placeholder="small and mischievous, with a crooked beak">
+      <div class="queue-actions">
+        <button id="quickAdd" type="button">Add to queue</button>
+      </div>
+
+      <div class="hint" style="margin-top:18px;">Or add several at once — one per line: <code>element | animal | characteristic</code></div>
+      <textarea id="queueInput" rows="5" placeholder="element | animal | characteristic">psychic | crow | small and mischievous, with a crooked beak
+fire | salamander | stocky, wreathed in low flame
+water | jellyfish | translucent, drifts sideways</textarea>
+      <div class="queue-actions">
+        <button class="ghost" id="addToQueue" type="button">Add lines to queue</button>
+        <button class="ghost" id="clearQueue" type="button">Clear queue</button>
+        <label style="display:inline-flex;align-items:center;gap:6px;margin:0;color:var(--ink-dim);font-size:12px;">
+          <input type="file" id="csvUpload" accept=".csv,.txt" style="display:none;">
+          <button class="ghost" type="button" id="csvUploadBtn">Import .csv</button>
+        </label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="results-head">
+        <h2 style="flex-shrink:0;">Results</h2>
+        <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+        <span class="progress-txt" id="progressTxt">0 / 0</span>
+      </div>
+      <div class="queue-actions" style="margin-top:0;margin-bottom:16px;">
+        <button id="runAll" type="button">Generate all queued</button>
+        <button class="ghost" id="downloadZip" type="button">Download all as .zip</button>
+        <button class="danger" id="removeDone" type="button">Clear finished</button>
+      </div>
+      <div id="cardsWrap">
+        <div class="empty-state" id="emptyState">Nothing queued yet. Add species on the left, then hit Generate.</div>
+        <div class="cards" id="cards"></div>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const SLOT_DEFS = [
+    { key: "card",        label: "card",        instr: "The character facing forward" },
+    { key: "battlefront", label: "battlefront",  instr: "The character facing us like they're in a Pokémon battle" },
+    { key: "battleback",  label: "battleback",   instr: "The same as the battle pose above but from behind" },
+    { key: "asleep",      label: "asleep",       instr: "The character asleep" }
+  ];
+
+  const DEFAULT_ELEMENTS = [
+    { name: "fire",     palette: "warm ember orange and charcoal", color: "#c1502e" },
+    { name: "water",    palette: "cool teal and deep aqua",        color: "#3d7ea6" },
+    { name: "leaf",     palette: "mossy green and warm brown",     color: "#7fb069" },
+    { name: "volt",     palette: "electric yellow and violet",     color: "#e2b04a" },
+    { name: "psychic",  palette: "psychic-themed",                 color: "#9b6bc4" },
+    { name: "normal",   palette: "warm neutral tan and cream",     color: "#b8ab8f" }
+  ];
+
+  // Fixed prompt template — not shown in the UI. {description}, {palette}, {background} are swapped per animal.
+  const BASE_PROMPT = `Flat vector game icon of {description}, thick black outline, chunky rounded shapes, flat cel-shaded coloring, {palette} color palette, centered on {background} background, no gradients, mobile game asset style. No text.
+
+Generate 4 images.
+
+1. The character facing forward
+2. The character facing us like they're in a Pokémon battle
+3. The same as 2 but from behind
+4. The character asleep`;
+  const DEFAULT_BACKGROUND = "green";
+
+  // ---------- persisted settings ----------
+  const LS_KEY = "evopalAssetBuilder.v1";
+  function loadSettings(){
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch(e){ return {}; }
+  }
+  function saveSettings(){
+    const data = {
+      apiKey: $("apiKey").value,
+      model: $("model").value,
+      concurrency: $("concurrency").value,
+      delayMs: $("delayMs").value,
+      elements: state.elements,
+      stripBg: $("stripBg").checked,
+      cropCenter: $("cropCenter").checked,
+      canvasSize: $("canvasSize").value,
+      bgTolerance: $("bgTolerance").value,
+      quantize: $("quantize").checked,
+      quantColors: $("quantColors").value
+    };
+    try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e){ /* quota / private mode — ignore */ }
+  }
+
+  function $(id){ return document.getElementById(id); }
+
+  const state = {
+    elements: DEFAULT_ELEMENTS.slice(),
+    queue: [],     // {id, animal, characteristic, description, element, status, error, slots:[{status,url,blob}]}
+    running: false
+  };
+
+  function renderElementDropdown(){
+    const sel = $("quickElement");
+    const current = sel.value;
+    sel.innerHTML = state.elements.map(e => `<option value="${escapeAttr(e.name)}">${escapeHtml(e.name)}</option>`).join("");
+    if (state.elements.some(e => e.name === current)) sel.value = current;
+  }
+
+  // ---------- element palette editor ----------
+  function renderElements(){
+    const wrap = $("elemList");
+    wrap.innerHTML = "";
+    state.elements.forEach((el, i) => {
+      const row = document.createElement("div");
+      row.className = "elem-row";
+      row.innerHTML = `
+        <input type="color" value="${el.color}" data-i="${i}" data-f="color">
+        <input type="text" value="${escapeAttr(el.name)}" data-i="${i}" data-f="name" placeholder="element name">
+        <input type="text" value="${escapeAttr(el.palette)}" data-i="${i}" data-f="palette" placeholder="palette description">
+        <button class="icon-btn" data-i="${i}" title="remove">×</button>
+      `;
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", e => {
+        const i = +e.target.dataset.i, f = e.target.dataset.f;
+        state.elements[i][f] = e.target.value;
+        if (f === "name") renderElementDropdown();
+        saveSettings();
+      });
+    });
+    wrap.querySelectorAll("button.icon-btn").forEach(btn => {
+      btn.addEventListener("click", e => {
+        state.elements.splice(+e.target.dataset.i, 1);
+        renderElements();
+        saveSettings();
+      });
+    });
+    renderElementDropdown();
+  }
+  $("addElem").addEventListener("click", () => {
+    state.elements.push({ name: "new", palette: "describe the palette", color: "#7fb069" });
+    renderElements();
+    saveSettings();
+  });
+
+  function escapeAttr(s){ return String(s).replace(/"/g, "&quot;"); }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function slugify(s){
+    return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "species";
+  }
+  function elementFor(name){
+    const n = (name || "").trim().toLowerCase();
+    return state.elements.find(e => e.name.toLowerCase() === n) || state.elements[0] || DEFAULT_ELEMENTS[0];
+  }
+
+  // ---------- log ----------
+  function log(msg, cls){
+    const l = $("log");
+    const line = document.createElement("div");
+    if (cls) line.className = cls;
+    const t = new Date().toLocaleTimeString();
+    line.textContent = `[${t}] ${msg}`;
+    l.appendChild(line);
+    l.scrollTop = l.scrollHeight;
+  }
+
+  // ---------- quick add (single entry) ----------
+  $("quickAdd").addEventListener("click", () => {
+    const animal = $("quickAnimal").value.trim();
+    if (!animal){ log("Enter an animal first.", "err"); return; }
+    const characteristic = $("quickCharacteristic").value.trim();
+    const element = $("quickElement").value || (state.elements[0] && state.elements[0].name) || "normal";
+    addSpecies(animal, characteristic, element);
+    $("quickAnimal").value = "";
+    $("quickCharacteristic").value = "";
+    log(`Added ${animal} to the queue.`, "ok");
+    renderCards();
+  });
+
+  // ---------- bulk queue input ----------
+  $("addToQueue").addEventListener("click", () => {
+    const lines = $("queueInput").value.split("\n").map(l => l.trim()).filter(Boolean);
+    let added = 0;
+    lines.forEach(line => {
+      const parts = line.split("|").map(p => p.trim());
+      if (parts.length < 2 || !parts[1]) return; // need at least element | animal
+      const element = parts[0] || (state.elements[0] && state.elements[0].name) || "normal";
+      const animal = parts[1];
+      const characteristic = parts[2] || "";
+      addSpecies(animal, characteristic, element);
+      added++;
+    });
+    if (added){
+      $("queueInput").value = "";
+      log(`Added ${added} species to the queue.`, "ok");
+    }
+    renderCards();
+  });
+
+  $("clearQueue").addEventListener("click", () => {
+    if (state.running){ log("Can't clear while a run is in progress.", "err"); return; }
+    state.queue = [];
+    renderCards();
+  });
+
+  $("csvUploadBtn").addEventListener("click", () => $("csvUpload").click());
+  $("csvUpload").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const lines = String(reader.result).split("\n").map(l => l.trim()).filter(Boolean);
+      let added = 0;
+      lines.forEach(line => {
+        const sep = line.includes("|") ? "|" : ",";
+        const parts = line.split(sep).map(p => p.trim());
+        if (parts.length < 2 || !parts[1] || /^element$/i.test(parts[0])) return; // skip header row
+        addSpecies(parts[1], parts[2] || "", parts[0] || (state.elements[0]||{}).name || "normal");
+        added++;
+      });
+      log(`Imported ${added} species from ${file.name}.`, "ok");
+      renderCards();
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  function addSpecies(animal, characteristic, element){
+    const description = characteristic ? `${characteristic} ${animal}`.replace(/\s+/g, " ").trim() : animal;
+    state.queue.push({
+      id: "s" + Math.random().toString(36).slice(2, 9),
+      animal, characteristic, description, element,
+      slug: slugify(animal),
+      status: "idle", // idle | pending | ok | error
+      error: null,
+      slots: SLOT_DEFS.map(() => ({ status: "idle", url: null, blob: null }))
+    });
+  }
+
+  // ---------- Gemini calls ----------
+  function apiUrl(model){
+    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  }
+
+  async function callGemini(promptText, expectedImages){
+    const key = $("apiKey").value.trim();
+    if (!key) throw new Error("No API key set");
+    const model = $("model").value;
+    const body = {
+      contents: [{ parts: [{ text: promptText }] }],
+      generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
+    };
+    let resp, attempt = 0, lastErr;
+    while (attempt < 3){
+      attempt++;
+      try {
+        resp = await fetch(apiUrl(model), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify(body)
+        });
+      } catch(e){
+        lastErr = e; await sleep(600 * attempt); continue;
+      }
+      if (resp.status === 429 || resp.status === 503){
+        lastErr = new Error(`HTTP ${resp.status}`);
+        await sleep(1200 * attempt);
+        continue;
+      }
+      break;
+    }
+    if (!resp) throw lastErr || new Error("Request failed");
+    if (!resp.ok){
+      let detail = "";
+      try { detail = (await resp.json()).error?.message || ""; } catch(e){}
+      throw new Error(`HTTP ${resp.status}${detail ? ": " + detail : ""}`);
+    }
+    const json = await resp.json();
+    const cand = json.candidates && json.candidates[0];
+    if (!cand) {
+      const blockReason = json.promptFeedback && json.promptFeedback.blockReason;
+      throw new Error(blockReason ? `Blocked: ${blockReason}` : "No candidates returned");
+    }
+    const parts = (cand.content && cand.content.parts) || [];
+    const images = parts.filter(p => p.inlineData && p.inlineData.data).map(p => p.inlineData);
+    return images;
+  }
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  function buildBatchPrompt(species){
+    const el = elementFor(species.element);
+    return BASE_PROMPT
+      .replace(/\{description\}/g, species.description)
+      .replace(/\{palette\}/g, el.palette)
+      .replace(/\{background\}/g, DEFAULT_BACKGROUND);
+  }
+
+  function buildSlotPrompt(species, slotDef){
+    const el = elementFor(species.element);
+    return `Flat vector game icon of ${species.description}, thick black outline, chunky rounded shapes, flat cel-shaded coloring, ${el.palette} color palette, centered on ${DEFAULT_BACKGROUND} background, no gradients, mobile game asset style. No text.\n\nGenerate exactly 1 image: ${slotDef.instr}.`;
+  }
+
+  // ---------- image post-processing ----------
+  async function blobFromInline(inline){
+    const bytes = atob(inline.data);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new Blob([arr], { type: inline.mimeType || "image/png" });
+  }
+
+  function loadImage(blob){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(blob);
+      img.onload = () => { resolve(img); URL.revokeObjectURL(url); };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  async function processImage(blob){
+    const doStrip = $("stripBg").checked;
+    const doCrop = $("cropCenter").checked;
+    const doQuant = $("quantize").checked;
+    if (!doStrip && !doCrop && !doQuant) return blob;
+
+    const img = await loadImage(blob);
+    let canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    let ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imgData.data;
+    const w = canvas.width, h = canvas.height;
+
+    if (doStrip){
+      const tol = parseInt($("bgTolerance").value, 10) || 28;
+      const corners = [0, (w-1)*4, (h-1)*w*4, ((h-1)*w + (w-1))*4];
+      const avg = [0,0,0];
+      corners.forEach(off => { avg[0]+=data[off]; avg[1]+=data[off+1]; avg[2]+=data[off+2]; });
+      avg[0]/=4; avg[1]/=4; avg[2]/=4;
+
+      const visited = new Uint8Array(w*h);
+      const stack = [];
+      const seedPositions = [];
+      for (let x=0;x<w;x++){ seedPositions.push(x); seedPositions.push((h-1)*w + x); }
+      for (let y=0;y<h;y++){ seedPositions.push(y*w); seedPositions.push(y*w + (w-1)); }
+      seedPositions.forEach(p => { if(!visited[p]){ stack.push(p); visited[p]=1; } });
+
+      function closeEnough(off){
+        const dr = data[off]-avg[0], dg = data[off+1]-avg[1], db = data[off+2]-avg[2];
+        return Math.sqrt(dr*dr+dg*dg+db*db) <= tol;
+      }
+      while (stack.length){
+        const p = stack.pop();
+        const off = p*4;
+        if (!closeEnough(off)) continue;
+        data[off+3] = 0;
+        const x = p % w, y = (p / w) | 0;
+        const neighbors = [];
+        if (x>0) neighbors.push(p-1);
+        if (x<w-1) neighbors.push(p+1);
+        if (y>0) neighbors.push(p-w);
+        if (y<h-1) neighbors.push(p+w);
+        neighbors.forEach(np => {
+          if (!visited[np]){ visited[np]=1; stack.push(np); }
+        });
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    if (doCrop){
+      let minX=w, minY=h, maxX=-1, maxY=-1;
+      for (let y=0;y<h;y++){
+        for (let x=0;x<w;x++){
+          const off = (y*w+x)*4;
+          if (data[off+3] > 8){
+            if (x<minX) minX=x; if (x>maxX) maxX=x;
+            if (y<minY) minY=y; if (y>maxY) maxY=y;
+          }
+        }
+      }
+      if (maxX >= minX && maxY >= minY){
+        const cw = maxX-minX+1, ch = maxY-minY+1;
+        const cropCanvas = document.createElement("canvas");
+        cropCanvas.width = cw; cropCanvas.height = ch;
+        cropCanvas.getContext("2d").drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+
+        const size = parseInt($("canvasSize").value, 10) || 512;
+        const pad = Math.round(size * 0.08);
+        const target = size - pad*2;
+        const scale = Math.min(target/cw, target/ch, 1) || 1;
+        const dw = Math.round(cw*scale), dh = Math.round(ch*scale);
+
+        const finalCanvas = document.createElement("canvas");
+        finalCanvas.width = size; finalCanvas.height = size;
+        const fctx = finalCanvas.getContext("2d");
+        fctx.imageSmoothingEnabled = true;
+        fctx.drawImage(cropCanvas, 0, 0, cw, ch, (size-dw)/2, (size-dh)/2, dw, dh);
+        canvas = finalCanvas;
+        ctx = fctx;
+        imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        data = imgData.data;
+      }
+    }
+
+    if (doQuant){
+      const n = Math.max(4, Math.min(256, parseInt($("quantColors").value, 10) || 32));
+      quantizeImageData(imgData, n);
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    return new Promise(resolve => canvas.toBlob(b => resolve(b), "image/png"));
+  }
+
+  // Median-cut quantizer. Operates in place on imgData.data, ignoring fully transparent pixels.
+  function quantizeImageData(imgData, targetColors){
+    const data = imgData.data;
+    const pixels = [];
+    for (let i=0;i<data.length;i+=4){
+      if (data[i+3] > 8) pixels.push(i);
+    }
+    if (pixels.length === 0) return;
+
+    function boxFromIndices(indices){
+      let rMin=255,gMin=255,bMin=255,rMax=0,gMax=0,bMax=0;
+      indices.forEach(i => {
+        const r=data[i],g=data[i+1],b=data[i+2];
+        if(r<rMin)rMin=r; if(r>rMax)rMax=r;
+        if(g<gMin)gMin=g; if(g>gMax)gMax=g;
+        if(b<bMin)bMin=b; if(b>bMax)bMax=b;
+      });
+      return { indices, rMin,gMin,bMin,rMax,gMax,bMax };
+    }
+
+    let boxes = [boxFromIndices(pixels)];
+
+    function widestChannel(box){
+      const rr = box.rMax-box.rMin, gr = box.gMax-box.gMin, br = box.bMax-box.bMin;
+      if (rr>=gr && rr>=br) return 0;
+      if (gr>=rr && gr>=br) return 1;
+      return 2;
+    }
+
+    while (boxes.length < targetColors){
+      boxes.sort((a,b) => {
+        const va = (a.rMax-a.rMin)*(a.gMax-a.gMin)*(a.bMax-a.bMin)*a.indices.length;
+        const vb = (b.rMax-b.rMin)*(b.gMax-b.gMin)*(b.bMax-b.bMin)*b.indices.length;
+        return vb - va;
+      });
+      const box = boxes[0];
+      if (box.indices.length < 2) break;
+      const ch = widestChannel(box);
+      const sorted = box.indices.slice().sort((a,b) => data[a+ch]-data[b+ch]);
+      const mid = sorted.length >> 1;
+      const left = boxFromIndices(sorted.slice(0, mid));
+      const right = boxFromIndices(sorted.slice(mid));
+      boxes.shift();
+      boxes.push(left, right);
+      if (boxes.every(b => b.indices.length < 2)) break;
+    }
+
+    boxes.forEach(box => {
+      let r=0,g=0,b=0;
+      box.indices.forEach(i => { r+=data[i]; g+=data[i+1]; b+=data[i+2]; });
+      const n = box.indices.length;
+      r = Math.round(r/n); g = Math.round(g/n); b = Math.round(b/n);
+      box.indices.forEach(i => { data[i]=r; data[i+1]=g; data[i+2]=b; });
+    });
+  }
+
+  // ---------- generation flow ----------
+  async function generateSpecies(species){
+    species.status = "pending";
+    species.error = null;
+    renderCards();
+    try {
+      const prompt = buildBatchPrompt(species);
+      const images = await callGemini(prompt);
+      if (images.length === 0){
+        throw new Error("No images in response (likely a safety block or an over-long prompt)");
+      }
+      for (let i=0;i<4;i++){
+        if (images[i]){
+          const rawBlob = await blobFromInline(images[i]);
+          const finalBlob = await processImage(rawBlob);
+          species.slots[i] = { status: "ok", url: URL.createObjectURL(finalBlob), blob: finalBlob };
+        } else {
+          species.slots[i] = { status: "missing", url: null, blob: null };
+        }
+      }
+      if (images.length < 4){
+        species.status = "error";
+        species.error = `Only got ${images.length}/4 images — regenerate the missing slot(s) individually.`;
+        log(`${species.animal}: only ${images.length}/4 images returned.`, "err");
+      } else {
+        species.status = "ok";
+        log(`${species.animal}: generated all 4 assets.`, "ok");
+      }
+    } catch(err){
+      species.status = "error";
+      species.error = err.message || String(err);
+      log(`${species.animal}: ${species.error}`, "err");
+    }
+    renderCards();
+  }
+
+  async function regenerateSlot(species, slotIndex){
+    species.slots[slotIndex].status = "pending";
+    renderCards();
+    try {
+      const prompt = buildSlotPrompt(species, SLOT_DEFS[slotIndex]);
+      const images = await callGemini(prompt);
+      if (images.length === 0) throw new Error("No image returned");
+      const rawBlob = await blobFromInline(images[0]);
+      const finalBlob = await processImage(rawBlob);
+      species.slots[slotIndex] = { status: "ok", url: URL.createObjectURL(finalBlob), blob: finalBlob };
+      if (species.slots.every(s => s.status === "ok")){
+        species.status = "ok"; species.error = null;
+      }
+      log(`${species.animal}: regenerated ${SLOT_DEFS[slotIndex].label}.`, "ok");
+    } catch(err){
+      species.slots[slotIndex].status = "error";
+      log(`${species.animal}/${SLOT_DEFS[slotIndex].label}: ${err.message}`, "err");
+    }
+    renderCards();
+  }
+
+  async function runQueue(){
+    if (state.running) return;
+    const key = $("apiKey").value.trim();
+    if (!key){ log("Add your Gemini API key first.", "err"); return; }
+    const todo = state.queue.filter(s => s.status === "idle" || s.status === "error");
+    if (todo.length === 0){ log("Nothing left to generate — clear finished, or add more species.", "err"); return; }
+    state.running = true;
+    $("runAll").disabled = true;
+    const concurrency = Math.max(1, Math.min(6, parseInt($("concurrency").value,10) || 2));
+    const delayMs = Math.max(0, parseInt($("delayMs").value,10) || 0);
+    let done = 0;
+    updateProgress(done, todo.length);
+
+    let cursor = 0;
+    async function worker(){
+      while (cursor < todo.length){
+        const species = todo[cursor++];
+        await generateSpecies(species);
+        done++;
+        updateProgress(done, todo.length);
+        if (delayMs) await sleep(delayMs);
+      }
+    }
+    await Promise.all(Array.from({length: concurrency}, worker));
+    state.running = false;
+    $("runAll").disabled = false;
+    log(`Run finished: ${done} species processed.`, "ok");
+  }
+
+  function updateProgress(done, total){
+    $("progressBar").style.width = total ? `${(done/total)*100}%` : "0%";
+    $("progressTxt").textContent = `${done} / ${total}`;
+  }
+
+  // ---------- rendering ----------
+  function renderCards(){
+    $("queueCount").textContent = `${state.queue.length} queued`;
+    const wrap = $("cards");
+    const empty = $("emptyState");
+    if (state.queue.length === 0){
+      wrap.style.display = "none"; empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none"; wrap.style.display = "grid";
+    wrap.innerHTML = "";
+    state.queue.forEach(species => {
+      const el = elementFor(species.element);
+      const card = document.createElement("div");
+      card.className = "card";
+      const statusCls = species.status === "ok" ? "ok" : species.status === "error" ? "error" : species.status === "pending" ? "pending" : "idle";
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="name">${escapeHtml(species.animal)}</div>
+            <div class="slug">${species.characteristic ? escapeHtml(species.characteristic) : species.slug}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+            <span class="elem-tag" style="background:${el.color}33;color:${el.color};border:1px solid ${el.color}66;">${escapeHtml(el.name)}</span>
+            <span class="status ${statusCls}">${species.status}</span>
+          </div>
+        </div>
+        <div class="slots">
+          ${species.slots.map((s, i) => `
+            <div class="slot" data-species="${species.id}" data-slot="${i}">
+              <span class="label">${SLOT_DEFS[i].label}</span>
+              ${s.url ? `<img src="${s.url}" alt="${SLOT_DEFS[i].label}">` :
+                `<div class="empty">${s.status === "pending" ? "…" : s.status === "error" ? "failed" : s.status === "missing" ? "missing" : "—"}</div>`}
+              <div class="overlay">
+                <button class="regen" title="Regenerate this slot">↻</button>
+                ${s.url ? `<button class="dl" title="Download PNG">⬇</button>` : ""}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        ${species.error ? `<div class="card-note">${escapeHtml(species.error)}</div>` : ""}
+        <div class="card-foot">
+          <button class="ghost small gen-one">Generate all 4</button>
+          <button class="danger small remove-one">Remove</button>
+        </div>
+      `;
+      card.querySelector(".gen-one").addEventListener("click", () => generateSpecies(species));
+      card.querySelector(".remove-one").addEventListener("click", () => {
+        state.queue = state.queue.filter(s => s.id !== species.id);
+        renderCards();
+      });
+      card.querySelectorAll(".slot").forEach(slotEl => {
+        const idx = +slotEl.dataset.slot;
+        const regenBtn = slotEl.querySelector(".regen");
+        if (regenBtn) regenBtn.addEventListener("click", () => regenerateSlot(species, idx));
+        const dlBtn = slotEl.querySelector(".dl");
+        if (dlBtn) dlBtn.addEventListener("click", () => {
+          const a = document.createElement("a");
+          a.href = species.slots[idx].url;
+          a.download = `${species.slug}_${SLOT_DEFS[idx].label}.png`;
+          a.click();
+        });
+      });
+      wrap.appendChild(card);
+    });
+  }
+
+  $("runAll").addEventListener("click", runQueue);
+  $("removeDone").addEventListener("click", () => {
+    state.queue = state.queue.filter(s => s.status !== "ok");
+    renderCards();
+  });
+
+  // ---------- test connection ----------
+  $("testConn").addEventListener("click", async () => {
+    const key = $("apiKey").value.trim();
+    const res = $("testResult");
+    if (!key){ res.textContent = "enter a key first"; res.style.color = "var(--rust)"; return; }
+    res.textContent = "checking…"; res.style.color = "var(--ink-dim)";
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+        headers: { "x-goog-api-key": key }
+      });
+      if (r.ok){ res.textContent = "key works"; res.style.color = "var(--moss)"; }
+      else { res.textContent = `HTTP ${r.status}`; res.style.color = "var(--rust)"; }
+    } catch(e){
+      res.textContent = "network error"; res.style.color = "var(--rust)";
+    }
+  });
+
+  // ---------- ZIP export (store-only, no compression needed for PNGs) ----------
+  function crc32(buf){
+    let c, table = crc32.table || (crc32.table = (() => {
+      const t = [];
+      for (let n=0;n<256;n++){
+        c = n;
+        for (let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        t[n] = c;
+      }
+      return t;
+    })());
+    let crc = 0 ^ (-1);
+    for (let i=0;i<buf.length;i++) crc = (crc >>> 8) ^ table[(crc ^ buf[i]) & 0xFF];
+    return (crc ^ (-1)) >>> 0;
+  }
+
+  function u16(n){ return new Uint8Array([n & 0xFF, (n>>>8) & 0xFF]); }
+  function u32(n){ return new Uint8Array([n & 0xFF, (n>>>8) & 0xFF, (n>>>16) & 0xFF, (n>>>24) & 0xFF]); }
+  function concatBytes(arrs){
+    const total = arrs.reduce((s,a) => s + a.length, 0);
+    const out = new Uint8Array(total);
+    let off = 0;
+    arrs.forEach(a => { out.set(a, off); off += a.length; });
+    return out;
+  }
+  function strBytes(s){ return new TextEncoder().encode(s); }
+
+  async function buildZip(files){ // files: [{name, blob}]
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+    for (const f of files){
+      const nameBytes = strBytes(f.name);
+      const data = new Uint8Array(await f.blob.arrayBuffer());
+      const crc = crc32(data);
+      const modTime = u16(0), modDate = u16(0x21); // arbitrary fixed date, fine for a batch export
+
+      const localHeader = concatBytes([
+        u32(0x04034b50), u16(20), u16(0), u16(0), modTime, modDate,
+        u32(crc), u32(data.length), u32(data.length),
+        u16(nameBytes.length), u16(0)
+      ]);
+      localParts.push(localHeader, nameBytes, data);
+
+      const centralHeader = concatBytes([
+        u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), modTime, modDate,
+        u32(crc), u32(data.length), u32(data.length),
+        u16(nameBytes.length), u16(0), u16(0), u16(0), u16(0), u32(0),
+        u32(offset)
+      ]);
+      centralParts.push(centralHeader, nameBytes);
+      offset += localHeader.length + nameBytes.length + data.length;
+    }
+    const centralStart = offset;
+    const centralBytes = concatBytes(centralParts);
+    const end = concatBytes([
+      u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
+      u32(centralBytes.length), u32(centralStart), u16(0)
+    ]);
+    return new Blob([concatBytes(localParts), centralBytes, end], { type: "application/zip" });
+  }
+
+  $("downloadZip").addEventListener("click", async () => {
+    const files = [];
+    state.queue.forEach(species => {
+      species.slots.forEach((s, i) => {
+        if (s.blob) files.push({ name: `${species.slug}_${SLOT_DEFS[i].label}.png`, blob: s.blob });
+      });
+    });
+    if (files.length === 0){ log("Nothing generated yet to export.", "err"); return; }
+    log(`Zipping ${files.length} images…`);
+    const zip = await buildZip(files);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(zip);
+    a.download = `evopal-assets-${new Date().toISOString().slice(0,10)}.zip`;
+    a.click();
+    log(`Downloaded evopal-assets zip (${files.length} images).`, "ok");
+  });
+
+  // ---------- persist settings on change ----------
+  ["apiKey","model","concurrency","delayMs","stripBg","cropCenter","canvasSize","bgTolerance","quantize","quantColors"]
+    .forEach(id => $(id).addEventListener("change", saveSettings));
+
+  // ---------- init ----------
+  (function init(){
+    const saved = loadSettings();
+    if (saved.apiKey) $("apiKey").value = saved.apiKey;
+    if (saved.model) $("model").value = saved.model;
+    if (saved.concurrency) $("concurrency").value = saved.concurrency;
+    if (saved.delayMs != null) $("delayMs").value = saved.delayMs;
+    if (Array.isArray(saved.elements) && saved.elements.length) state.elements = saved.elements;
+    if (saved.stripBg != null) $("stripBg").checked = saved.stripBg;
+    if (saved.cropCenter != null) $("cropCenter").checked = saved.cropCenter;
+    if (saved.canvasSize) $("canvasSize").value = saved.canvasSize;
+    if (saved.bgTolerance != null) $("bgTolerance").value = saved.bgTolerance;
+    if (saved.quantize != null) $("quantize").checked = saved.quantize;
+    if (saved.quantColors) $("quantColors").value = saved.quantColors;
+    renderElements();
+    renderCards();
+    log("Ready. Paste species into the queue and add your API key to begin.");
+  })();
+
+})();
+</script>
+</body>
+</html>
