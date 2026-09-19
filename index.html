@@ -561,9 +561,27 @@ Generate 4 images.
   function slugify(s){
     return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "species";
   }
+  // A fallback used ONLY when the requested element genuinely doesn't match
+  // anything in the configured list. Deliberately a flat, unmistakably "off"
+  // grey rather than silently reusing state.elements[0] (which used to mean
+  // an unmatched "leaf" — e.g. from a stale saved name, a typo, or trailing
+  // whitespace — would silently render in whatever the FIRST configured
+  // element's palette was, such as fire's warm orange, with nothing to show
+  // it had happened) — this way a mismatch looks visibly wrong instead of
+  // looking like a different, but plausible, real element.
+  const UNKNOWN_ELEMENT = { name: "unknown", palette: "flat neutral grey", color: "#9aa0a6" };
+
   function elementFor(name){
     const n = (name || "").trim().toLowerCase();
-    return state.elements.find(e => e.name.toLowerCase() === n) || state.elements[0] || DEFAULT_ELEMENTS[0];
+    return state.elements.find(e => e.name.trim().toLowerCase() === n) || null;
+  }
+
+  // Same lookup, but always returns something render-able and tells you
+  // whether it actually matched — use this wherever a mismatch needs to be
+  // visible (prompt-building, card display) rather than silently absorbed.
+  function elementForSafe(name){
+    const match = elementFor(name);
+    return match ? { el: match, matched: true } : { el: UNKNOWN_ELEMENT, matched: false };
   }
 
   // ---------- log ----------
@@ -594,18 +612,23 @@ Generate 4 images.
   $("addToQueue").addEventListener("click", () => {
     const lines = $("queueInput").value.split("\n").map(l => l.trim()).filter(Boolean);
     let added = 0;
+    const unmatched = new Set();
     lines.forEach(line => {
       const parts = line.split("|").map(p => p.trim());
       if (parts.length < 2 || !parts[1]) return; // need at least element | animal
       const element = parts[0] || (state.elements[0] && state.elements[0].name) || "normal";
       const animal = parts[1];
       const characteristic = parts[2] || "";
+      if (!elementFor(element)) unmatched.add(element);
       addSpecies(animal, characteristic, element);
       added++;
     });
     if (added){
       $("queueInput").value = "";
       log(`Added ${added} species to the queue.`, "ok");
+    }
+    if (unmatched.size){
+      log(`Heads up: ${[...unmatched].map(e => `"${e}"`).join(", ")} doesn't match any element in Settings → Element palettes — those species will generate with a neutral placeholder palette until fixed.`, "err");
     }
     renderCards();
   });
@@ -624,14 +647,20 @@ Generate 4 images.
     reader.onload = () => {
       const lines = String(reader.result).split("\n").map(l => l.trim()).filter(Boolean);
       let added = 0;
+      const unmatched = new Set();
       lines.forEach(line => {
         const sep = line.includes("|") ? "|" : ",";
         const parts = line.split(sep).map(p => p.trim());
         if (parts.length < 2 || !parts[1] || /^element$/i.test(parts[0])) return; // skip header row
-        addSpecies(parts[1], parts[2] || "", parts[0] || (state.elements[0]||{}).name || "normal");
+        const element = parts[0] || (state.elements[0]||{}).name || "normal";
+        if (!elementFor(element)) unmatched.add(element);
+        addSpecies(parts[1], parts[2] || "", element);
         added++;
       });
       log(`Imported ${added} species from ${file.name}.`, "ok");
+      if (unmatched.size){
+        log(`Heads up: ${[...unmatched].map(e => `"${e}"`).join(", ")} doesn't match any element in Settings → Element palettes — those species will generate with a neutral placeholder palette until fixed.`, "err");
+      }
       renderCards();
     };
     reader.readAsText(file);
@@ -703,7 +732,9 @@ Generate 4 images.
   function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
   function buildBatchPrompt(species){
-    const el = elementFor(species.element);
+    const { el, matched } = elementForSafe(species.element);
+    species.elementMismatch = !matched;
+    if (!matched) log(`${species.animal}: "${species.element}" doesn't match any configured element — using a neutral placeholder palette instead of the intended one. Check spelling/case in the queue against the Settings → Element palettes list.`, "err");
     return BASE_PROMPT
       .replace(/\{description\}/g, species.description)
       .replace(/\{palette\}/g, el.palette)
@@ -711,7 +742,9 @@ Generate 4 images.
   }
 
   function buildSlotPrompt(species, slotDef){
-    const el = elementFor(species.element);
+    const { el, matched } = elementForSafe(species.element);
+    species.elementMismatch = !matched;
+    if (!matched) log(`${species.animal}: "${species.element}" doesn't match any configured element — using a neutral placeholder palette instead of the intended one.`, "err");
     return `Flat vector game icon of ${species.description}, thick black outline, chunky rounded shapes, flat cel-shaded coloring, ${el.palette} color palette, centered on ${DEFAULT_BACKGROUND} background, no gradients, mobile game asset style. No text.\n\nGenerate exactly 1 image: ${slotDef.instr}.`;
   }
 
@@ -991,7 +1024,7 @@ Generate 4 images.
     empty.style.display = "none"; wrap.style.display = "grid";
     wrap.innerHTML = "";
     state.queue.forEach(species => {
-      const el = elementFor(species.element);
+      const { el, matched } = elementForSafe(species.element);
       const card = document.createElement("div");
       card.className = "card";
       const statusCls = species.status === "ok" ? "ok" : species.status === "error" ? "error" : species.status === "pending" ? "pending" : "idle";
@@ -1002,7 +1035,7 @@ Generate 4 images.
             <div class="slug">${species.characteristic ? escapeHtml(species.characteristic) : species.slug}</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
-            <span class="elem-tag" style="background:${el.color}33;color:${el.color};border:1px solid ${el.color}66;">${escapeHtml(el.name)}</span>
+            <span class="elem-tag" style="background:${el.color}33;color:${el.color};border:1px solid ${el.color}66;" ${matched ? "" : `title="“${escapeAttr(species.element)}” doesn't match any configured element — this generated with a neutral placeholder palette instead"`}>${matched ? escapeHtml(el.name) : `⚠ ${escapeHtml(species.element)}`}</span>
             <span class="status ${statusCls}">${species.status}</span>
             ${species.cost ? `<span class="footer-note" style="margin:0;">$${species.cost.toFixed(3)}</span>` : ""}
           </div>
@@ -1165,7 +1198,7 @@ Generate 4 images.
     empty.style.display = "none"; wrap.style.display = "grid";
     wrap.innerHTML = "";
     historyRecords.forEach(rec => {
-      const el = elementFor(rec.element);
+      const { el } = elementForSafe(rec.element);
       const date = new Date(rec.savedAt);
       const card = document.createElement("div");
       card.className = "card";
